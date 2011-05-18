@@ -1,0 +1,66 @@
+<script type="text/javascript" src="../fpsmonitor.js"></script>
+
+<script>
+var block, mCanvas, context, canvasWidth, canvasHeight;
+var fps = new fpsMonitor(15); //initialize the fpsMonitor object with a drawInterval of 15ms
+
+function init() {
+	mCanvas = document.getElementById("mCanvas");
+	context = mCanvas.getContext("2d");
+	canvasWidth = mCanvas.width;
+	canvasHeight = mCanvas.height;
+
+	block = {
+		x:5,
+		y:5,
+		state: "down",
+		
+		update: function(context) {
+			switch (this.state) {
+				case "down":
+					if (this.y == 745) {
+						this.state = "up";
+					} else {
+						this.y += 1;
+					}
+					break;
+					
+				case "up":
+					if (this.y == 5) {
+						this.state = "down";
+					} else { 
+						this.y -= 1;		
+					}
+					break;
+			}
+			this.render(context);
+		},
+		
+		render: function(context) {
+			context.fillRect(this.x, this.y, 50, 50);
+		}
+	};
+	setTimeout("mainLoop()", fps.drawInterval);
+}
+
+function mainLoop() {
+	fps.beforeRender(); //call this method before you render everything to the canvas
+	
+	context.save();
+	context.clearRect(0, 0, canvasWidth, canvasHeight);
+	
+	block.update(context);
+	
+	context.restore();
+	
+	fps.afterRender(); //call this method after you render everything to the canvas
+	document.getElementById("fps").innerHTML = fps.getfpsString(); //set the fps span element to reflect the current FPS
+	
+	setTimeout("mainLoop()", fps.drawInterval);
+}
+</script>
+
+<body onload="init()">
+<span id="fps"></span><br>
+<canvas id="mCanvas" width="800" height="800"></canvas>
+</body>

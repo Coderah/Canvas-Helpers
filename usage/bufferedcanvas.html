@@ -1,0 +1,103 @@
+<script type="text/javascript" src="../bufferedcanvas.js"></script>
+<script type="text/javascript" src="../fpsmonitor.js"></script>
+<script type="text/javascript" src="dependency/jquery.js"></script>
+
+<script>
+var bufferType="Normal", rendererDouble, rendererTriple, block;
+var fps = new fpsMonitor(15);
+
+function init() {
+	rendererDouble = new bufferedCanvas(
+		$("#buffer1, #buffer2").get() //get an array of all three buffer elements
+	);
+	rendererTriple = new bufferedCanvas(
+		$("#buffer1, #buffer2, #buffer3").get() //get an array of all three buffer elements
+	);
+	block = {
+		x:5,
+		y:5,
+		state: "down",
+		
+		update: function(context) {
+			switch (this.state) {
+				case "down":
+					if (this.y == 745) {
+						this.state = "up";
+					} else {
+						this.y += 1;
+					}
+					break;
+					
+				case "up":
+					if (this.y == 5) {
+						this.state = "down";
+					} else { 
+						this.y -= 1;		
+					}
+					break;
+			}
+			this.render(context);
+		},
+		
+		render: function(context) {
+			context.fillRect(this.x, this.y, 50, 50);
+		}
+	};
+	setTimeout("mainLoop()", fps.drawInterval);
+	$(document).mousemove(function(e) {
+		block.x = e.pageX;
+		block.y = e.pageY;
+	});
+	$("#bufferType").change(function() {
+		$("#buffer2, #buffer3").hide();
+		$("#buffer1").show();
+		
+		bufferType = $(this).val();
+	});
+}
+
+function mainLoop() {
+	var context;
+	
+	fps.beforeRender();
+	
+	switch (bufferType) {
+		case "Normal":
+			var buffer = $("#buffer1").get(0);
+			context = buffer.getContext("2d");
+			var width = buffer.width, height = buffer.height;
+			context.save();
+			context.clearRect(0, 0, width, height);
+			break;
+		
+		case "Double Buffered":
+			context = rendererDouble.getContext(true);
+			break;
+		
+		case "Triple Buffered":
+			context = rendererTriple.getContext(true);
+			break;
+	}
+	
+	block.render(context);
+	if (bufferType == "Normal") {
+		context.restore();
+	}
+	
+	fps.afterRender();
+	$("#fps").html(fps.getfpsString());
+	
+	setTimeout("mainLoop()", fps.drawInterval);
+}
+</script>
+
+<body onload="init()">
+<select id="bufferType">
+	<option value="Normal">Normal</option>
+	<option value="Double Buffered">Double Buffered</option>
+	<option value="Triple Buffered">Triple Buffered</option>
+</select> <span id="fps"></span><br>
+<canvas id="buffer1" width="800" height="800"></canvas>
+<canvas id="buffer2" width="800" height="800" style="display:none;"></canvas>
+<canvas id="buffer3" width="800" height="800" style="display:none;"></canvas>
+</body>
