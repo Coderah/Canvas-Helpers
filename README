@@ -1,0 +1,7 @@
+Canvas Helpers is a collection of javascript "classes" that help with certain uses of the html5 canvas.
+
+bufferedCanvas.js:
+	bufferedCanvas is an attempt to use buffered rendering to smooth animations and complicated rendering procedure and its experimental.
+	
+fpsMonitor.js:
+	fpsMonitor is a "class" that helps with monitoring the fps of your rendering on a canvas.
